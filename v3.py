@@ -6,12 +6,63 @@ import openai
 import os
 from dotenv import load_dotenv
 
+st.set_page_config(page_title="Acne Detection & Solution", layout="centered")
+
+
+#
+# st.markdown(
+#     """
+#     <style>
+#     /* Apply gradient background to the entire app */
+#     [data-testid="stAppViewContainer"] {
+#         background: linear-gradient(325deg, rgba(13,13,103,1) 0%, rgba(0,77,117,1) 60%, rgba(0,172,222,1) 82%, rgba(3,202,250,1) 88%, rgba(0,205,255,1) 93%, rgba(19,187,221,1) 100%);
+#     }
+#
+#     /* Remove sidebar black background */
+#     [data-testid="stSidebar"] {
+#         background: transparent;
+#     }
+#
+#     /* Remove black top menu bar */
+#     header, [data-testid="stHeader"] {
+#         background: transparent;
+#     }
+#     </style>
+#     """,
+#     unsafe_allow_html=True
+# )
+
+st.markdown(
+    """
+    <style>
+    /* Apply gradient background to the entire app */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(325deg, rgba(13,13,103,1) 0%, rgba(0,77,117,1) 60%, rgba(0,172,222,1) 82%, rgba(3,202,250,1) 88%, rgba(0,205,255,1) 93%, rgba(19,187,221,1) 100%);
+    }
+
+    /* Apply light blue gradient to the sidebar */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(90deg, rgba(180, 220, 255, 1) 0%, rgba(140, 200, 255, 1) 50%, rgba(100, 180, 255, 1) 100%);
+        color: black; /* Ensure text is readable */
+    }
+
+    /* Remove black top menu bar */
+    header, [data-testid="stHeader"] {
+        background: transparent;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
 api_key = st.secrets["general"]["OPENAI_API_KEY"]
 
 # Initialize OpenAI client
 client = OpenAI(api_key=api_key)
 
-st.set_page_config(page_title="Acne Detection & Solution", layout="centered")
+
 
 
 CREDENTIALS_FILE = "user_credentials.csv"
@@ -308,6 +359,51 @@ def acne_analysis():
                 st.write(response.choices[0].message.content)
 
 
+# AI Dermatologist Page
+def ai_dermatologist():
+    st.title("🩺 Ask Anything to AI Dermatologist")
+
+    # Initialize OpenAI client only once
+    if "openai_client" not in st.session_state:
+        st.session_state["openai_client"] = OpenAI(api_key=api_key)
+
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+
+    # Display only user and assistant messages (not system message)
+    for message in st.session_state["messages"]:
+        if message["role"] != "system":
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+    # User input field (should now be visible)
+    user_input = st.chat_input("Ask your skin-related question...")
+
+    if user_input:
+        st.session_state["messages"].append({"role": "user", "content": user_input})
+
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        with st.spinner("Thinking..."):
+            response = st.session_state["openai_client"].chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are an AI Dermatologist. Answer skin-related questions accurately and professionally.you will not entertain any other question at all."},
+                    *st.session_state["messages"]
+                ],
+                temperature=0.5,
+                max_tokens=400
+            )
+
+        ai_response = response.choices[0].message.content
+        st.session_state["messages"].append({"role": "assistant", "content": ai_response})
+
+        with st.chat_message("assistant"):
+            st.markdown(ai_response)
+
+
+
 import streamlit as st
 
 def main():
@@ -323,13 +419,15 @@ def main():
             st.rerun()
 
         # Page Navigation
-        page = st.sidebar.radio("Select Page", ["Acne Analysis", "Profile Setup", "About Page",
+        page = st.sidebar.radio("Select Page", ["Acne Analysis", "Profile Setup", "AI Dermatologist", "About Page",
                                                 "Privacy Policy", "Terms and Conditions",
                                                 "Contact Us", "FAQs"])
         if page == "Acne Analysis":
             acne_analysis()
         elif page == "Profile Setup":
             profile_setup()
+        elif page == "AI Dermatologist":
+            ai_dermatologist()
         elif page == "About Page":
             about_page()
         elif page == "Privacy Policy":
