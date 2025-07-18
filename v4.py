@@ -132,6 +132,8 @@ def password_recovery():
             st.error("Incorrect email or security answer.")
 
 
+
+
 def profile_setup():
     st.title("Profile Setup Page")
 
@@ -141,27 +143,71 @@ def profile_setup():
     # Display saved profile data at the top
     if st.session_state["profile_data"]:
         st.subheader("Your Saved Profile")
-        st.write(f"**Skin Type:** {st.session_state['profile_data']['skin_type']}")
-        st.write(f"**Acne Frequency:** {st.session_state['profile_data']['acne_frequency']}")
-        st.write(f"**Concerns:** {st.session_state['profile_data']['concerns']}")
-        st.write(f"**Age:** {st.session_state['profile_data']['age']}")
+        profile_data = st.session_state["profile_data"]
+        st.write(f"**Name:** {profile_data['first_name']} {profile_data['last_name']}")
+        st.write(f"**Age:** {profile_data['age']} ({profile_data['dob']})")
+        st.write(f"**Gender:** {profile_data['gender']}")
+        if profile_data["email"]:
+            st.write(f"**Email:** {profile_data['email']}")
+        st.write(f"**Skin Type:** {profile_data['skin_type']}")
+        st.write(f"**Breakout Frequency:** {profile_data['acne_frequency']}")
+        st.write(f"**Skin Concerns:** {', '.join(profile_data['concerns'])}")
+        st.write(f"**Sensitive Skin:** {profile_data['sensitive_skin']}")
+        st.write(f"**Skincare Routine:** {profile_data['skincare_routine']}")
+        st.write(f"**Makeup Usage:** {profile_data['makeup_usage']}")
+        if profile_data["allergies"]:
+            st.write(f"**Allergies:** {profile_data['allergies']}")
+        st.write(f"**Diet:** {profile_data['diet']}")
+        st.write(f"**Water Intake:** {profile_data['water_intake']}")
+        st.write(f"**Sleep Hours:** {profile_data['sleep_hours']}")
         st.markdown("---")
 
     # Profile setup form
-    skin_type = st.selectbox("Select your skin type", ["Oily", "Dry", "Combination"])
-    acne_frequency = st.slider("How often do you experience acne breakouts? (1 - Rarely, 10 - Very Frequent)", 1, 10, 5)
-    concerns = st.text_area("Enter your skin concerns (e.g., acne scars, blackheads)")
-    age = st.number_input("Enter your age", min_value=10, max_value=100, step=1)
+    st.subheader("Basic Information")
+    first_name = st.text_input("First Name")
+    last_name = st.text_input("Last Name")
+    age = st.number_input("Age", min_value=10, max_value=100, step=1)
+    dob = st.date_input("Date of Birth")
+    gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+    email = st.text_input("Email (Optional)")
+
+    st.subheader("Skin-related Questions")
+    skin_type = st.selectbox("What is your skin type?", ["Oily", "Dry", "Combination", "Sensitive", "Normal"])
+    acne_frequency = st.selectbox("How often do you experience breakouts?", ["Rarely", "Occasionally", "Frequently", "Always"])
+    concerns = st.multiselect("Do you have any specific skin concerns?", ["Acne", "Redness", "Dark Spots", "Large Pores", "Blackheads/Whiteheads"])
+    sensitive_skin = st.radio("Is your skin prone to sensitivity?", ["Yes", "No"])
+    skincare_routine = st.selectbox("What is your current skincare routine?", ["None", "Basic", "Extensive"])
+    makeup_usage = st.selectbox("How often do you wear makeup?", ["Never", "Occasionally", "Daily"])
+    allergies = st.text_area("Are there any known allergies or sensitivities to skincare products? (Optional)")
+
+    st.subheader("Lifestyle Questions")
+    diet = st.selectbox("How would you describe your diet?", ["Healthy", "Moderate", "Unhealthy"])
+    water_intake = st.selectbox("On average, how much water do you drink daily?", ["Less than 1L", "1-2L", "More than 2L"])
+    sleep_hours = st.selectbox("How many hours of sleep do you get per night?", ["Less than 5", "5-7", "More than 7"])
 
     if st.button("Save Profile"):
         st.session_state["profile_data"] = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "age": age,
+            "dob": str(dob),
+            "gender": gender,
+            "email": email,
             "skin_type": skin_type,
             "acne_frequency": acne_frequency,
             "concerns": concerns,
-            "age": age
+            "sensitive_skin": sensitive_skin,
+            "skincare_routine": skincare_routine,
+            "makeup_usage": makeup_usage,
+            "allergies": allergies,
+            "diet": diet,
+            "water_intake": water_intake,
+            "sleep_hours": sleep_hours
         }
         st.success("Profile information saved successfully!")
         st.rerun()  # Refresh the page to display saved data at the top
+
+
 
 
 
