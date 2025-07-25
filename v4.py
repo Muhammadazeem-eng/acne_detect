@@ -105,6 +105,8 @@ def sign_up():
 
 
 def login():
+    st.image("IMG_5251.jpeg.jpg", use_container_width=False, width=150)
+
     st.title("Login")
     username = st.text_input("Enter your username")
     password = st.text_input("Enter your password", type="password")
